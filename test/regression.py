@@ -55,9 +55,9 @@ class RegressionTests(unittest.TestCase):
         # reset before a rollback, but only those that are still in the
         # statement cache. The others are not accessible from the connection object.
         con = sqlite.connect(":memory:", cached_statements=5)
-        cursors = [con.cursor() for x in range(5)]
+        cursors = [con.cursor() for _ in range(5)]
         cursors[0].execute("create table test(x)")
-        for i in range(10):
+        for _ in range(10):
             cursors[0].executemany("insert into test(x) values (?)", [(x,) for x in range(10)])
 
         for i in range(5):
@@ -84,7 +84,7 @@ class RegressionTests(unittest.TestCase):
         for i in range(105):
             cur = con.cursor()
             cursors.append(cur)
-            cur.execute("select 1 x union select " + str(i))
+            cur.execute(f"select 1 x union select {str(i)}")
         con.close()
 
     @unittest.skipIf(sqlite.sqlite_version_info < (3, 2, 2), 'needs sqlite 3.2.2 or newer')

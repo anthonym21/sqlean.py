@@ -53,8 +53,8 @@ def TimestampFromTicks(ticks):
     return Timestamp(*time.localtime(ticks)[:6])
 
 
-version_info = tuple([int(x) for x in version.split(".")])
-sqlite_version_info = tuple([int(x) for x in sqlite_version.split(".")])
+version_info = tuple(int(x) for x in version.split("."))
+sqlite_version_info = tuple(int(x) for x in sqlite_version.split("."))
 
 Binary = memoryview
 collections.abc.Sequence.register(Row)

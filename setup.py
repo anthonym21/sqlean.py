@@ -59,7 +59,7 @@ def quote_argument(arg):
     return q + arg + q
 
 
-define_macros = [("MODULE_NAME", quote_argument(PACKAGE_NAME + ".dbapi2"))]
+define_macros = [("MODULE_NAME", quote_argument(f"{PACKAGE_NAME}.dbapi2"))]
 
 
 class Builder(build_ext):
@@ -100,7 +100,7 @@ class Builder(build_ext):
             "USE_URI",
         )
         for feature in features:
-            ext.define_macros.append(("SQLITE_%s" % feature, "1"))
+            ext.define_macros.append((f"SQLITE_{feature}", "1"))
 
         # Always use memory for temp store.
         ext.define_macros.append(("SQLITE_TEMP_STORE", "3"))

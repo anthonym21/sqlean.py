@@ -515,9 +515,7 @@ class AuthorizerTests(unittest.TestCase):
     def authorizer_cb(action, arg1, arg2, dbname, source):
         if action != sqlite.SQLITE_SELECT:
             return sqlite.SQLITE_DENY
-        if arg2 == "c2" or arg1 == "t2":
-            return sqlite.SQLITE_DENY
-        return sqlite.SQLITE_OK
+        return sqlite.SQLITE_DENY if arg2 == "c2" or arg1 == "t2" else sqlite.SQLITE_OK
 
     def setUp(self):
         self.con = sqlite.connect(":memory:")
@@ -569,9 +567,7 @@ class AuthorizerIllegalTypeTests(AuthorizerTests):
     def authorizer_cb(action, arg1, arg2, dbname, source):
         if action != sqlite.SQLITE_SELECT:
             return 0.0
-        if arg2 == "c2" or arg1 == "t2":
-            return 0.0
-        return sqlite.SQLITE_OK
+        return 0.0 if arg2 == "c2" or arg1 == "t2" else sqlite.SQLITE_OK
 
 
 class AuthorizerLargeIntegerTests(AuthorizerTests):
@@ -579,9 +575,7 @@ class AuthorizerLargeIntegerTests(AuthorizerTests):
     def authorizer_cb(action, arg1, arg2, dbname, source):
         if action != sqlite.SQLITE_SELECT:
             return 2**32
-        if arg2 == "c2" or arg1 == "t2":
-            return 2**32
-        return sqlite.SQLITE_OK
+        return 2**32 if arg2 == "c2" or arg1 == "t2" else sqlite.SQLITE_OK
 
 
 def suite():

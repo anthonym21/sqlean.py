@@ -213,7 +213,7 @@ class DMLStatementDetectionTestCase(unittest.TestCase):
     Use sqlite3_stmt_readonly to determine if the statement is DML or not.
     """
     def setUp(self):
-        for f in glob.glob(get_db_path() + '*'):
+        for f in glob.glob(f'{get_db_path()}*'):
             try:
                 os.unlink(f)
             except OSError:
