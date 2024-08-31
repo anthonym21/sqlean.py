@@ -248,16 +248,18 @@ class TraceCallbackTests(unittest.TestCase):
         traced_statements = []
         def trace(statement):
             traced_statements.append(statement)
+
         con.set_trace_callback(trace)
         con.execute("create table foo(x)")
         # Can't execute bound parameters as their values don't appear
         # in traced statements before SQLite 3.6.21
         # (cf. http://www.sqlite.org/draft/releaselog/3_6_21.html)
-        con.execute('insert into foo(x) values ("%s")' % unicode_value)
+        con.execute(f'insert into foo(x) values ("{unicode_value}")')
         con.commit()
-        self.assertTrue(any(unicode_value in stmt for stmt in traced_statements),
-                        "Unicode data %s garbled in trace callback: %s"
-                        % (ascii(unicode_value), ', '.join(map(ascii, traced_statements))))
+        self.assertTrue(
+            any(unicode_value in stmt for stmt in traced_statements),
+            f"Unicode data {ascii(unicode_value)} garbled in trace callback: {', '.join(map(ascii, traced_statements))}",
+        )
 
     def CheckTraceCallbackContent(self):
         # set_trace_callback() shouldn't produce duplicate content (bpo-26187)

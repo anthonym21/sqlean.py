@@ -94,13 +94,10 @@ class DeclTypesTests(unittest.TestCase):
             return self.val == other.val
 
         def __conform__(self, protocol):
-            if protocol is sqlite.PrepareProtocol:
-                return self.val
-            else:
-                return None
+            return self.val if protocol is sqlite.PrepareProtocol else None
 
         def __str__(self):
-            return "<%s>" % self.val
+            return f"<{self.val}>"
 
     class BadConform:
         def __init__(self, exc):
@@ -244,8 +241,8 @@ class ColNamesTests(unittest.TestCase):
         self.cur = self.con.cursor()
         self.cur.execute("create table test(x foo)")
 
-        sqlite.converters["FOO"] = lambda x: "[%s]" % x.decode("ascii")
-        sqlite.converters["BAR"] = lambda x: "<%s>" % x.decode("ascii")
+        sqlite.converters["FOO"] = lambda x: f'[{x.decode("ascii")}]'
+        sqlite.converters["BAR"] = lambda x: f'<{x.decode("ascii")}>'
         sqlite.converters["EXC"] = lambda x: 5/0
         sqlite.converters["B1B1"] = lambda x: "MARKER"
 
@@ -336,8 +333,8 @@ class CommonTableExpressionTests(unittest.TestCase):
 
 
 class ObjectAdaptationTests(unittest.TestCase):
-    def cast(obj):
-        return float(obj)
+    def cast(self):
+        return float(self)
     cast = staticmethod(cast)
 
     def setUp(self):
@@ -361,8 +358,8 @@ class ObjectAdaptationTests(unittest.TestCase):
 
 @unittest.skipUnless(zlib, "requires zlib")
 class BinaryConverterTests(unittest.TestCase):
-    def convert(s):
-        return zlib.decompress(s)
+    def convert(self):
+        return zlib.decompress(self)
     convert = staticmethod(convert)
 
     def setUp(self):

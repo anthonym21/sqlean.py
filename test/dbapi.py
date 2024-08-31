@@ -32,7 +32,9 @@ from os import unlink
 
 class ModuleTests(unittest.TestCase):
     def CheckAPILevel(self):
-        self.assertEqual(sqlite.apilevel, "2.0", "apilevel is %s, should be 2.0" % sqlite.apilevel)
+        self.assertEqual(
+            sqlite.apilevel, "2.0", f"apilevel is {sqlite.apilevel}, should be 2.0"
+        )
 
     def CheckThreadSafety(self):
         self.assertEqual(
@@ -41,7 +43,9 @@ class ModuleTests(unittest.TestCase):
 
     def CheckParamStyle(self):
         self.assertEqual(
-            sqlite.paramstyle, "qmark", "paramstyle is '%s', should be 'qmark'" % sqlite.paramstyle
+            sqlite.paramstyle,
+            "qmark",
+            f"paramstyle is '{sqlite.paramstyle}', should be 'qmark'",
         )
 
     def CheckWarning(self):
@@ -206,9 +210,9 @@ class ConnectionTests(unittest.TestCase):
         self.addCleanup(unlink, TESTFN)
         with sqlite.connect(TESTFN) as cx:
             cx.execute("create table test(id integer)")
-        with sqlite.connect("file:" + TESTFN, uri=True) as cx:
+        with sqlite.connect(f"file:{TESTFN}", uri=True) as cx:
             cx.execute("insert into test(id) values(0)")
-        with sqlite.connect("file:" + TESTFN + "?mode=ro", uri=True) as cx:
+        with sqlite.connect(f"file:{TESTFN}?mode=ro", uri=True) as cx:
             with self.assertRaises(sqlite.OperationalError):
                 cx.execute("insert into test(id) values(1)")
 
@@ -388,6 +392,9 @@ class CursorTests(unittest.TestCase):
         self.cu.executemany("insert into test(income) values (?)", [(x,) for x in range(100, 110)])
 
     def CheckExecuteManyIterator(self):
+
+
+
         class MyIter:
             def __init__(self):
                 self.value = 5
@@ -395,9 +402,9 @@ class CursorTests(unittest.TestCase):
             def __next__(self):
                 if self.value == 10:
                     raise StopIteration
-                else:
-                    self.value += 1
-                    return (self.value,)
+                self.value += 1
+                return (self.value,)
+
 
         self.cu.executemany("insert into test(income) values (?)", MyIter())
 
@@ -426,9 +433,7 @@ class CursorTests(unittest.TestCase):
         self.cu.execute("insert into test(id) values (?)", (5,))
         self.cu.execute("insert into test(id) values (?)", (6,))
         self.cu.execute("select id from test order by id")
-        lst = []
-        for row in self.cu:
-            lst.append(row[0])
+        lst = [row[0] for row in self.cu]
         self.assertEqual(lst[0], 5)
         self.assertEqual(lst[1], 6)
 
@@ -528,9 +533,9 @@ class CursorTests(unittest.TestCase):
 
     def CheckLastRowIDInsertOR(self):
         results = []
+        sql = "INSERT OR {} INTO test(unique_test) VALUES (?)"
         for statement in ("FAIL", "ABORT", "ROLLBACK"):
-            sql = "INSERT OR {} INTO test(unique_test) VALUES (?)"
-            with self.subTest(statement="INSERT OR {}".format(statement)):
+            with self.subTest(statement=f"INSERT OR {statement}"):
                 self.cu.execute(sql.format(statement), (statement,))
                 results.append((statement, self.cu.lastrowid))
                 with self.assertRaises(sqlite.IntegrityError):
@@ -687,7 +692,7 @@ class BlobTests(unittest.TestCase):
 
     def CheckBlobGetSliceWithSkip(self):
         self.blob.write(b"abcdefghij")
-        self.assertEqual(self.blob[0:10:2], b"acegi")
+        self.assertEqual(self.blob[:10:2], b"acegi")
 
     def CheckBlobSetItem(self):
         self.blob[0] = b"b"
@@ -696,14 +701,14 @@ class BlobTests(unittest.TestCase):
         )
 
     def CheckBlobSetSlice(self):
-        self.blob[0:5] = b"bbbbb"
+        self.blob[:5] = b"bbbbb"
         self.assertEqual(
             self.cx.execute("select blob_col from test").fetchone()[0],
             b"bbbbb" + self.blob_data[5:],
         )
 
     def CheckBlobSetSliceWithSkip(self):
-        self.blob[0:10:2] = b"bbbbb"
+        self.blob[:10:2] = b"bbbbb"
         self.assertEqual(
             self.cx.execute("select blob_col from test").fetchone()[0],
             b"bababababa" + self.blob_data[10:],
@@ -757,7 +762,7 @@ class ThreadTests(unittest.TestCase):
         t = threading.Thread(target=run, kwargs={"con": self.con, "errors": errors})
         t.start()
         t.join()
-        if len(errors) > 0:
+        if errors:
             self.fail("\n".join(errors))
 
     def CheckConCommit(self):
@@ -775,7 +780,7 @@ class ThreadTests(unittest.TestCase):
         t = threading.Thread(target=run, kwargs={"con": self.con, "errors": errors})
         t.start()
         t.join()
-        if len(errors) > 0:
+        if errors:
             self.fail("\n".join(errors))
 
     def CheckConRollback(self):
@@ -793,7 +798,7 @@ class ThreadTests(unittest.TestCase):
         t = threading.Thread(target=run, kwargs={"con": self.con, "errors": errors})
         t.start()
         t.join()
-        if len(errors) > 0:
+        if errors:
             self.fail("\n".join(errors))
 
     def CheckConClose(self):
@@ -811,7 +816,7 @@ class ThreadTests(unittest.TestCase):
         t = threading.Thread(target=run, kwargs={"con": self.con, "errors": errors})
         t.start()
         t.join()
-        if len(errors) > 0:
+        if errors:
             self.fail("\n".join(errors))
 
     def CheckCurImplicitBegin(self):
@@ -829,7 +834,7 @@ class ThreadTests(unittest.TestCase):
         t = threading.Thread(target=run, kwargs={"cur": self.cur, "errors": errors})
         t.start()
         t.join()
-        if len(errors) > 0:
+        if errors:
             self.fail("\n".join(errors))
 
     def CheckCurClose(self):
@@ -847,7 +852,7 @@ class ThreadTests(unittest.TestCase):
         t = threading.Thread(target=run, kwargs={"cur": self.cur, "errors": errors})
         t.start()
         t.join()
-        if len(errors) > 0:
+        if errors:
             self.fail("\n".join(errors))
 
     def CheckCurExecute(self):
@@ -866,7 +871,7 @@ class ThreadTests(unittest.TestCase):
         t = threading.Thread(target=run, kwargs={"cur": self.cur, "errors": errors})
         t.start()
         t.join()
-        if len(errors) > 0:
+        if errors:
             self.fail("\n".join(errors))
 
     def CheckCurIterNext(self):
@@ -886,7 +891,7 @@ class ThreadTests(unittest.TestCase):
         t = threading.Thread(target=run, kwargs={"cur": self.cur, "errors": errors})
         t.start()
         t.join()
-        if len(errors) > 0:
+        if errors:
             self.fail("\n".join(errors))
 
 

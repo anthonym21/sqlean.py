@@ -30,10 +30,7 @@ class MyConnection(sqlite.Connection):
         sqlite.Connection.__init__(self, *args, **kwargs)
 
 def dict_factory(cursor, row):
-    d = {}
-    for idx, col in enumerate(cursor.description):
-        d[col[0]] = row[idx]
-    return d
+    return {col[0]: row[idx] for idx, col in enumerate(cursor.description)}
 
 class MyCursor(sqlite.Cursor):
     def __init__(self, *args, **kwargs):
@@ -138,8 +135,8 @@ class RowFactoryTests(unittest.TestCase):
         # A sqlite.Row can be sliced like a list.
         self.con.row_factory = sqlite.Row
         row = self.con.execute("select 1, 2, 3, 4").fetchone()
-        self.assertEqual(row[0:0], ())
-        self.assertEqual(row[0:1], (1,))
+        self.assertEqual(row[:0], ())
+        self.assertEqual(row[:1], (1,))
         self.assertEqual(row[1:3], (2, 3))
         self.assertEqual(row[3:1], ())
         # Explicit bounds are optional.
@@ -149,15 +146,13 @@ class RowFactoryTests(unittest.TestCase):
         self.assertEqual(row[-2:-1], (3,))
         self.assertEqual(row[-2:], (3, 4))
         # Slicing supports steps.
-        self.assertEqual(row[0:4:2], (1, 3))
+        self.assertEqual(row[:4:2], (1, 3))
         self.assertEqual(row[3:0:-2], (4, 2))
 
     def CheckSqliteRowIter(self):
         """Checks if the row object is iterable"""
         self.con.row_factory = sqlite.Row
         row = self.con.execute("select 1 as a, 2 as b").fetchone()
-        for col in row:
-            pass
 
     def CheckSqliteRowAsTuple(self):
         """Checks if the row object can be converted to a tuple"""
